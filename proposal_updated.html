@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project Proposal: Medical Cost Personal (Insurance) Data Analysis</title>
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 22mm 16mm 22mm;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: "Times New Roman", Times, serif;
+    color: #111;
+    line-height: 1.4;
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+  }
+  .page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 260mm;
+    justify-content: space-between;
+  }
+  .page-break {
+    page-break-after: always;
+  }
+  .header {
+    border-bottom: 1.5px solid #222;
+    padding-bottom: 5px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11pt;
+    font-weight: bold;
+    color: #111;
+  }
+  .header .left {
+    line-height: 1.3;
+  }
+  .header .right {
+    text-align: right;
+  }
+  .footer {
+    border-top: 1.5px solid #222;
+    padding-top: 5px;
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11pt;
+    font-weight: bold;
+    color: #111;
+  }
+  .content {
+    flex: 1;
+  }
+  h1.title {
+    font-size: 20pt;
+    font-weight: bold;
+    line-height: 1.25;
+    margin-bottom: 14px;
+    color: #000;
+  }
+  h2.sec-title {
+    font-size: 13.5pt;
+    font-weight: bold;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    color: #000;
+  }
+  p {
+    font-size: 11pt;
+    line-height: 1.42;
+    margin-bottom: 7px;
+    text-align: justify;
+  }
+  .link-text {
+    color: #000;
+    word-break: break-all;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 10px 0;
+    font-size: 10.5pt;
+  }
+  th, td {
+    padding: 6px 9px;
+    border: 1px solid #777;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  ul {
+    margin: 4px 0 8px 22px;
+    font-size: 11pt;
+  }
+  li {
+    margin-bottom: 3px;
+  }
+  .italic-note {
+    font-style: italic;
+    font-size: 10pt;
+    margin: 4px 0;
+  }
+</style>
+</head>
+<body>
+
+  <!-- PAGE 1 -->
+  <div class="page-container page-break">
+    <div>
+      <div class="header">
+        <div class="left">
+          <div>IU2441230558</div>
+          <div>IU2441230559</div>
+        </div>
+        <div class="right">
+          PSC(CE0525)
+        </div>
+      </div>
+
+      <div class="content">
+        <h1 class="title">Project Proposal: Medical Cost Personal (Insurance) Data Analysis</h1>
+
+        <h2 class="sec-title">1. Project Definition</h2>
+        <p>
+          This project aims to analyze medical insurance charges using Python. It will explore how age, sex, BMI, number of children, smoking status, and region are associated with insurance costs. The project will include comprehensive data cleaning, exploratory data analysis, at least six statistical visualizations, an interactive User Interface (UI) dashboard with cost prediction, and a short insights report.
+        </p>
+
+        <h2 class="sec-title">2. Dataset Use Case</h2>
+        <p><strong>Dataset:</strong> Medical Cost Personal Datasets<br>
+        <strong>Source:</strong> Kaggle<br>
+        <strong>Link:</strong> <span class="link-text">https://www.kaggle.com/datasets/mirichoi0218/insurance</span></p>
+        <p>
+          The dataset contains 1,338 records and seven columns: age, sex, BMI, children, smoker, region, and charges. It will be used to explore patterns in insurance costs and compare charges across different groups.
+        </p>
+
+        <h2 class="sec-title">3. Planned Visualizations and Expected Outcomes</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 42%;">Graph/Plot</th>
+              <th>Expected Outcome</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Histogram of insurance charges</strong></td>
+              <td>Understand the distribution and common ranges of charges.</td>
+            </tr>
+            <tr>
+              <td><strong>Box plot: smoker vs. non-smoker</strong></td>
+              <td>Compare typical charges and variability by smoking status.</td>
+            </tr>
+            <tr>
+              <td><strong>Scatter plot: age vs. charges</strong></td>
+              <td>Examine the relationship between age and insurance costs.</td>
+            </tr>
+            <tr>
+              <td><strong>Scatter plot: BMI vs. charges</strong></td>
+              <td>Identify patterns between BMI and insurance costs.</td>
+            </tr>
+            <tr>
+              <td><strong>Bar chart: average charges by region</strong></td>
+              <td>Compare average charges across regions.</td>
+            </tr>
+            <tr>
+              <td><strong>Bar chart: average charges by sex</strong></td>
+              <td>Compare average charges between males and females.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="italic-note">Actual findings will be reported after analyzing the dataset.</p>
+
+        <h2 class="sec-title">4. Python Libraries and Tools</h2>
+        <ul>
+          <li><strong>Python</strong> &mdash; Programming and analysis</li>
+          <li><strong>Pandas</strong> &mdash; Data cleaning and manipulation</li>
+          <li><strong>NumPy</strong> &mdash; Numerical operations</li>
+          <li><strong>Matplotlib</strong> &mdash; Graphs and charts</li>
+          <li><strong>Seaborn</strong> &mdash; Statistical visualizations</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>5 CSE-F</div>
+      <div>1</div>
+    </div>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div class="page-container">
+    <div>
+      <div class="header">
+        <div class="left">
+          <div>IU2441230558</div>
+          <div>IU2441230559</div>
+        </div>
+        <div class="right">
+          PSC(CE0525)
+        </div>
+      </div>
+
+      <div class="content">
+        <ul>
+          <li><strong>Scikit-Learn</strong> &mdash; Linear regression modeling and cost prediction (R² &approx; 0.75)</li>
+          <li><strong>Tkinter &amp; Web UI</strong> &mdash; Interactive user interface and dynamic insurance cost calculator</li>
+          <li><strong>Google Colab / Jupyter Notebook</strong> &mdash; Code development and execution</li>
+          <li><strong>GitHub</strong> &mdash; Project storage and documentation</li>
+        </ul>
+
+        <p style="margin-top: 14px;">
+          Data cleaning will include checks for missing values, duplicates, incorrect data types, and potential outliers.
+        </p>
+
+        <h2 class="sec-title" style="margin-top: 20px;">5. GitHub Repository Link</h2>
+        <p><strong>Repository:</strong> <span class="link-text">https://github.com/nandankhagram69/medical-cost-insurance-analysis</span></p>
+        <p>
+          The repository will contain the project documentation, proposal, Python notebook, UI application files (Web dashboard &amp; Desktop Tkinter app), and final insights report.
+        </p>
+
+        <h2 class="sec-title" style="margin-top: 20px;">Conclusion</h2>
+        <p>
+          This project will demonstrate the use of Python for data cleaning, exploratory data analysis, visualization, and interactive UI-based cost estimation to identify patterns in medical insurance charges.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>5 CSE-F</div>
+      <div>2</div>
+    </div>
+  </div>
+
+</body>
+</html>

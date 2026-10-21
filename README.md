@@ -1,71 +1,56 @@
-Medical Cost Personal (Insurance) — Data Analysis
-Project Overview
+# Medical Cost Personal (Insurance) Data Analysis & Predictor
 
-This project focuses on analyzing the Medical Cost Personal Insurance dataset using Python. It explores the relationship between personal characteristics and medical insurance charges through data cleaning, exploratory data analysis, and visualization.
+**Course:** PSC(CE0525) &mdash; 5 CSE-F &mdash; Indus University  
+**Student Team:** `IU2441230558`, `IU2441230559`  
+**GitHub Repository:** [nandankhagram69/medical-cost-insurance-analysis](https://github.com/nandankhagram69/medical-cost-insurance-analysis)
 
-Project Objectives
-Clean the dataset by checking missing values, duplicate records, data types, and potential outliers.
-Analyze medical insurance charges and personal characteristics.
-Create at least six graphs to identify patterns and relationships.
-Prepare a short report summarizing the findings.
-Dataset
+---
 
-Source: Kaggle — Medical Cost Personal Datasets
+## 🚀 Quick Start (Running the UI)
 
-Link: https://www.kaggle.com/datasets/mirichoi0218/insurance
+You have two simple ways to launch the UI:
 
-The dataset contains the following columns:
+### Option 1: Browser Web Dashboard (Recommended & Easiest)
+- Simply double-click [`index.html`](file:///C:/Project%2021-10/index.html) to open the interactive dashboard in any browser.
+- **Zero dependencies required** &mdash; works offline immediately.
 
-age: Age of the individual
-sex: Sex of the individual
-bmi: Body Mass Index
-children: Number of children
-smoker: Smoking status
-region: Geographical region
-charges: Medical insurance charges
-Data Cleaning
+### Option 2: Python Desktop GUI (Tkinter)
+- Double-click [`run_ui.bat`](file:///C:/Project%2021-10/run_ui.bat) and choose `[2] Launch Python Desktop GUI`.
+- Or run in terminal:
+  ```bash
+  python gui.py
+  ```
 
-The project will check:
+---
 
-Missing values
-Duplicate records
-Appropriate data types
-Potential outliers and invalid values
+## 📁 Project Contents
 
-Cleaning decisions will be documented, and valid observations will not be removed just because they have unusually high or low values.
+- [`index.html`](file:///C:/Project%2021-10/index.html): Responsive, interactive web dashboard featuring:
+  - **KPI summary cards** (1,338 records, mean charges, smoker stats, BMI averages)
+  - **Interactive Medical Cost Predictor** (Sliders for Age, BMI, Dependents, Smoker status, Region with instant ML-calibrated cost estimates and breakdown)
+  - **All 6 Planned Visualizations** rendered interactively with Chart.js
+  - **Searchable & Filterable Dataset Explorer** with pagination across all 1,338 records
+  - **Project Proposal & Research Findings summary**
+- [`gui.py`](file:///C:/Project%2021-10/gui.py): Native Python Desktop GUI built with standard `tkinter` + embedded `matplotlib`.
+- [`run_ui.bat`](file:///C:/Project%2021-10/run_ui.bat): Interactive one-click Windows launcher.
+- [`insurance.csv`](file:///C:/Project%2021-10/insurance.csv): Benchmark Kaggle dataset (1,338 records, 7 columns).
+- [`generate_plots.py`](file:///C:/Project%2021-10/generate_plots.py): Generates high-resolution Seaborn plots into `eda_plots/`.
+- [`eda_plots/`](file:///C:/Project%2021-10/eda_plots): Contains all 6 generated high-res visualization images.
 
-Planned Visualizations
-Histogram of insurance charges
-Box plot comparing charges for smokers and non-smokers
-Scatter plot of age versus charges
-Scatter plot of BMI versus charges
-Bar chart of average charges by region
-Bar chart of average charges by sex
-Python Libraries and Tools
-Python: Main programming language
-Pandas: Data manipulation and cleaning
-NumPy: Numerical operations
-Matplotlib: Graph creation
-Seaborn: Statistical visualization
-Google Colab / Jupyter Notebook: Code execution
-GitHub: Version control and project documentation
-Project Structure
+---
 
-The repository is planned to contain:
+## 📊 The 6 Planned Visualizations (Proposal Deliverables)
 
-README.md — Project documentation
-proposal.md — Project proposal
-insurance_analysis.ipynb — Python analysis notebook
-report.md — Final insights report
-requirements.txt — Python library requirements
+1. **Histogram of Insurance Charges**: Distribution showing a heavy right skew with peak charges between \$2,000&ndash;\$5,000.
+2. **Box Plot (Smoker vs. Non-Smoker)**: Direct comparison showing smokers pay nearly 4x more (\$32,050 average vs. \$8,434 for non-smokers).
+3. **Scatter Plot (Age vs. Charges)**: Clear upward trend (~+\$257 per year of age) divided into three distinct risk tiers.
+4. **Scatter Plot (BMI vs. Charges)**: Demonstrates the critical inflection point at BMI = 30 (obesity threshold) where smoker costs surge past \$40,000.
+5. **Bar Chart (Average Charges by Region)**: Southeast region has the highest average charges (\$14,735), followed by Northeast (\$13,406).
+6. **Bar Chart (Average Charges by Sex)**: Males incur slightly higher average charges (\$13,957) than females (\$12,570).
 
-The dataset will be downloaded from Kaggle when needed. It will be included in the repository only if its applicable terms permit redistribution.
+---
 
-Expected Outcomes
+## 📄 Proposal PDF Status
 
-The analysis is expected to identify patterns in medical insurance charges and explore their associations with age, BMI, smoking status, sex, and region. Actual findings will be added after the analysis is completed.
-
-Project Status
-
-Current stage: Proposal and repository setup.
-
+- **Original Proposal:** [`Python proposal.pdf`](file:///C:/Project%2021-10/Python%20proposal.pdf) is preserved completely intact.
+- **Updated Proposal:** [`Python proposal_updated.pdf`](file:///C:/Project%2021-10/Python%20proposal_updated.pdf) has been generated with identical formatting, incorporating the Interactive User Interface (UI), Scikit-Learn regression modeling, and UI project deliverables in case your instructor requires the proposal to reflect the added UI.

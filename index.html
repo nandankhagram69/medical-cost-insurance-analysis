@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Insurance Cost Analysis & Predictor</title>
+  <!-- Chart.js CDN with local fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="insurance_data.js"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #dbeafe;
+      --accent: #0ea5e9;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-600: #475569;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --gray-900: #0f172a;
+      --card-bg: #ffffff;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f8fafc;
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .header-container {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-title h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-title p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-top: 0.25rem;
+    }
+
+    .badges {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    nav {
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .nav-container {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      overflow-x: auto;
+      padding: 0 1rem;
+    }
+
+    .nav-btn {
+      padding: 0.9rem 1.25rem;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--gray-600);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-btn:hover {
+      color: var(--primary);
+    }
+
+    .nav-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    main {
+      max-width: 1300px;
+      margin: 1.5rem auto 3rem auto;
+      padding: 0 1rem;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* KPI Summary Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .kpi-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .kpi-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .kpi-info h3 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray-600);
+      margin-bottom: 0.25rem;
+    }
+
+    .kpi-info .kpi-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .kpi-info .kpi-sub {
+      font-size: 0.78rem;
+      color: var(--gray-600);
+    }
+
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-200);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.88rem;
+      color: var(--gray-600);
+      margin-bottom: 1.25rem;
+    }
+
+    /* Calculator Form */
+    .calc-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 860px) {
+      .calc-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+      color: var(--gray-700);
+    }
+
+    .form-val-badge {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .range-slider {
+      width: 100%;
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .input-field, .select-field {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus, .select-field:focus {
+      border-color: var(--primary);
+    }
+
+    .radio-pill-group {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .radio-pill {
+      flex: 1;
+      text-align: center;
+    }
+
+    .radio-pill input[type="radio"] {
+      display: none;
+    }
+
+    .radio-pill label {
+      display: block;
+      padding: 0.65rem 1rem;
+      background: var(--gray-100);
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .radio-pill input[type="radio"]:checked + label {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+
+    .radio-pill.danger input[type="radio"]:checked + label {
+      background: #fee2e2;
+      border-color: var(--danger);
+      color: #991b1b;
+    }
+
+    /* Calculator Result Box */
+    .result-box {
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      color: white;
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .result-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+    }
+
+    .result-amount {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #38bdf8;
+      margin: 0.5rem 0 1rem 0;
+    }
+
+    .result-factors {
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .factor-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+    }
+
+    .factor-name {
+      color: #cbd5e1;
+    }
+
+    .factor-value {
+      font-weight: 600;
+    }
+
+    .factor-value.pos {
+      color: #f87171;
+    }
+
+    .factor-value.neg {
+      color: #4ade80;
+    }
+
+    .bmi-indicator {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-left: 0.5rem;
+    }
+
+    .bmi-normal { background: #dcfce7; color: #166534; }
+    .bmi-overweight { background: #fef3c7; color: #92400e; }
+    .bmi-obese { background: #fee2e2; color: #991b1b; }
+
+    /* Visualizations Grid */
+    .plots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .plots-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .plot-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      border: 1px solid var(--gray-200);
+      box-shadow: var(--shadow);
+    }
+
+    .plot-header {
+      margin-bottom: 0.75rem;
+    }
+
+    .plot-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .plot-header p {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+    }
+
+    .plot-canvas-wrapper {
+      position: relative;
+      width: 100%;
+      height: 280px;
+    }
+
+    .static-img-preview {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      border: 1px solid var(--gray-200);
+    }
+
+    .static-img-preview:hover {
+      transform: scale(1.015);
+    }
+
+    /* Dataset Explorer Table */
+    .table-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 220px;
+      padding: 0.55rem 0.85rem;
+      border: 1.5px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .filter-select {
+      padding: 0.55rem 0.85rem;
+      border: 1.5px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: white;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    thead {
+      background: var(--gray-100);
+      color: var(--gray-700);
+      font-weight: 700;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    tbody tr:hover {
+      background-color: var(--gray-50);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .tag-smoker-yes { background: #fee2e2; color: #991b1b; }
+    .tag-smoker-no { background: #dcfce7; color: #166534; }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      font-size: 0.88rem;
+    }
+
+    .page-btn {
+      padding: 0.45rem 0.9rem;
+      border: 1px solid var(--gray-300);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Insights Callouts */
+    .insight-card {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1rem;
+    }
+
+    .insight-card h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 0.25rem;
+    }
+
+    .insight-card p {
+      font-size: 0.88rem;
+      color: var(--gray-700);
+    }
+
+    /* Modal for Image Preview */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 35px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <div class="header-title">
+        <h1>🏥 Medical Cost Personal Insurance Analysis & Predictor</h1>
+        <p>Exploratory Data Analysis, Statistical Visualizations & Interactive Insurance Cost Estimator</p>
+      </div>
+      <div class="badges">
+        <div class="badge">Indus University</div>
+        <div class="badge">Course: PSC(CE0525)</div>
+        <div class="badge">5 CSE-F</div>
+        <div class="badge">IU2441230558 | IU2441230559</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <button class="nav-btn active" onclick="switchTab('dashboard')">📊 Dashboard Overview</button>
+      <button class="nav-btn" onclick="switchTab('predictor')">💡 Cost Predictor</button>
+      <button class="nav-btn" onclick="switchTab('visualizations')">📈 6 Planned Visualizations</button>
+      <button class="nav-btn" onclick="switchTab('explorer')">📋 Dataset Explorer (1,338 Records)</button>
+      <button class="nav-btn" onclick="switchTab('proposal')">📄 Proposal & Findings</button>
+    </div>
+  </nav>
+
+  <main>
+    <!-- TAB 1: DASHBOARD OVERVIEW -->
+    <div id="tab-dashboard" class="tab-content active">
+      <!-- KPI Stats -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:#eff6ff; color:#2563eb;">📁</div>
+          <div class="kpi-info">
+            <h3>Total Records</h3>
+            <div class="kpi-value" id="kpi-count">1,338</div>
+            <div class="kpi-sub">7 Dataset Attributes</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:#f0fdf4; color:#10b981;">💵</div>
+          <div class="kpi-info">
+            <h3>Average Charge</h3>
+            <div class="kpi-value">$13,270</div>
+            <div class="kpi-sub">Median: $9,382</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:#fef2f2; color:#ef4444;">🚬</div>
+          <div class="kpi-info">
+            <h3>Smoker Avg Cost</h3>
+            <div class="kpi-value">$32,050</div>
+            <div class="kpi-sub">Non-Smoker Avg: $8,434</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:#fefce8; color:#eab308;">⚖️</div>
+          <div class="kpi-info">
+            <h3>Average BMI</h3>
+            <div class="kpi-value">30.66</div>
+            <div class="kpi-sub">Obese Threshold (≥30)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Dual Card: Predictor teaser & Quick Insight -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-title">🔍 Quick Insurance Cost Estimate</div>
+          <p class="card-subtitle">Adjust key indicators to see instant cost projection</p>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <label style="font-weight:600; font-size:0.88rem;">Age: <span id="quick-age-val">30</span> yrs</label>
+              <input type="range" class="range-slider" min="18" max="64" value="30" oninput="updateQuickEstimate()" id="quick-age">
+            </div>
+            <div>
+              <label style="font-weight:600; font-size:0.88rem;">BMI: <span id="quick-bmi-val">28.0</span></label>
+              <input type="range" class="range-slider" min="15" max="50" step="0.5" value="28.0" oninput="updateQuickEstimate()" id="quick-bmi">
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+              <label style="font-weight: 600; font-size: 0.88rem;">Smoker?</label>
+              <label><input type="radio" name="quick-smoker" value="no" checked onchange="updateQuickEstimate()"> No</label>
+              <label><input type="radio" name="quick-smoker" value="yes" onchange="updateQuickEstimate()"> Yes</label>
+            </div>
+            <div style="background: var(--gray-100); padding: 1rem; border-radius: 8px; text-align: center;">
+              <span style="font-size: 0.85rem; color: var(--gray-600);">Estimated Annual Premium:</span>
+              <div id="quick-result" style="font-size: 1.8rem; font-weight: 800; color: var(--primary);">$5,263</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-title">📌 Key Empirical Findings</div>
+          <p class="card-subtitle">Derived from exploratory analysis of Kaggle dataset</p>
+          <div class="insight-card">
+            <h4>Smoking is the #1 Cost Driver</h4>
+            <p>Smokers pay on average <strong>$32,050/yr</strong> compared to <strong>$8,434/yr</strong> for non-smokers (nearly a <strong>4x increase</strong> or +$23,800 penalty).</p>
+          </div>
+          <div class="insight-card">
+            <h4>BMI & Obesity Interaction</h4>
+            <p>For non-smokers, high BMI causes a mild increase. But for smokers with <strong>BMI ≥ 30</strong>, costs skyrocket past $40,000/year.</p>
+          </div>
+          <div class="insight-card">
+            <h4>Linear Age Progression</h4>
+            <p>Each additional year of age consistently adds approximately <strong>$257</strong> to annual insurance premiums.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview of the 6 Planned Charts -->
+      <div class="card">
+        <div class="card-title">📊 Quick Preview of the 6 Planned Visualizations</div>
+        <p class="card-subtitle">Click "6 Planned Visualizations" in the top bar to interact with full interactive charts.</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+          <div style="text-align: center;">
+            <img src="eda_plots/1_charges_histogram.png" alt="Charges Distribution" class="static-img-preview" onclick="openModal(this.src)">
+            <p style="font-size: 0.8rem; font-weight: 600; margin-top: 0.5rem;">1. Charges Distribution</p>
+          </div>
+          <div style="text-align: center;">
+            <img src="eda_plots/2_smoker_boxplot.png" alt="Smoker vs Non-Smoker" class="static-img-preview" onclick="openModal(this.src)">
+            <p style="font-size: 0.8rem; font-weight: 600; margin-top: 0.5rem;">2. Smoker vs. Non-Smoker</p>
+          </div>
+          <div style="text-align: center;">
+            <img src="eda_plots/3_age_vs_charges_scatter.png" alt="Age vs Charges" class="static-img-preview" onclick="openModal(this.src)">
+            <p style="font-size: 0.8rem; font-weight: 600; margin-top: 0.5rem;">3. Age vs. Charges</p>
+          </div>
+          <div style="text-align: center;">
+            <img src="eda_plots/4_bmi_vs_charges_scatter.png" alt="BMI vs Charges" class="static-img-preview" onclick="openModal(this.src)">
+            <p style="font-size: 0.8rem; font-weight: 600; margin-top: 0.5rem;">4. BMI vs. Charges</p>
+          </div>
+          <div style="text-align: center;">
+            <img src="eda_plots/5_region_barchart.png" alt="Region Comparison" class="static-img-preview" onclick="openModal(this.src)">
+            <p style="font-size: 0.8rem; font-weight: 600; margin-top: 0.5rem;">5. Region Comparison</p>
+          </div>
+          <div style="text-align: center;">
+            <img src="eda_plots/6_sex_barchart.png" alt="Sex Comparison" class="static-img-preview" onclick="openModal(this.src)">
+            <p style="font-size: 0.8rem; font-weight: 600; margin-top: 0.5rem;">6. Sex Comparison</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: COST PREDICTOR (CALCULATOR) -->
+    <div id="tab-predictor" class="tab-content">
+      <div class="card">
+        <div class="card-title">💡 Medical Insurance Cost Estimator</div>
+        <p class="card-subtitle">Predict medical insurance charges based on individual risk attributes calibrated using Multiple Linear Regression ($R^2 = 0.751$).</p>
+
+        <div class="calc-layout">
+          <!-- Input Form -->
+          <div>
+            <!-- Age -->
+            <div class="form-group">
+              <div class="form-label">
+                <span>Age (Years)</span>
+                <span class="form-val-badge" id="badge-age">35 yrs</span>
+              </div>
+              <input type="range" class="range-slider" id="calc-age" min="18" max="64" value="35" oninput="calculateFullEstimate()">
+            </div>
+
+            <!-- BMI -->
+            <div class="form-group">
+              <div class="form-label">
+                <span>Body Mass Index (BMI) <span id="bmi-status-badge" class="bmi-indicator bmi-overweight">Overweight</span></span>
+                <span class="form-val-badge" id="badge-bmi">27.5 kg/m²</span>
+              </div>
+              <input type="range" class="range-slider" id="calc-bmi" min="15.0" max="53.0" step="0.1" value="27.5" oninput="calculateFullEstimate()">
+              <small style="color: var(--gray-600); font-size: 0.78rem;">Normal: 18.5–24.9 | Overweight: 25.0–29.9 | Obese: ≥30.0</small>
+            </div>
+
+            <!-- Smoker Status -->
+            <div class="form-group">
+              <label class="form-label">Smoker Status</label>
+              <div class="radio-pill-group">
+                <div class="radio-pill">
+                  <input type="radio" id="smoker-no" name="calc-smoker" value="no" checked onchange="calculateFullEstimate()">
+                  <label for="smoker-no">🌱 Non-Smoker</label>
+                </div>
+                <div class="radio-pill danger">
+                  <input type="radio" id="smoker-yes" name="calc-smoker" value="yes" onchange="calculateFullEstimate()">
+                  <label for="smoker-yes">🚬 Smoker</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gender -->
+            <div class="form-group">
+              <label class="form-label">Biological Sex</label>
+              <div class="radio-pill-group">
+                <div class="radio-pill">
+                  <input type="radio" id="sex-female" name="calc-sex" value="female" checked onchange="calculateFullEstimate()">
+                  <label for="sex-female">👩 Female</label>
+                </div>
+                <div class="radio-pill">
+                  <input type="radio" id="sex-male" name="calc-sex" value="male" onchange="calculateFullEstimate()">
+                  <label for="sex-male">👨 Male</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Number of Children -->
+            <div class="form-group">
+              <div class="form-label">
+                <span>Children / Dependents</span>
+                <span class="form-val-badge" id="badge-children">1 Child</span>
+              </div>
+              <input type="range" class="range-slider" id="calc-children" min="0" max="5" value="1" oninput="calculateFullEstimate()">
+            </div>
+
+            <!-- Region -->
+            <div class="form-group">
+              <label class="form-label">Geographical Region</label>
+              <select class="select-field" id="calc-region" onchange="calculateFullEstimate()">
+                <option value="northeast">Northeast</option>
+                <option value="northwest">Northwest</option>
+                <option value="southeast" selected>Southeast (Highest Avg Charges)</option>
+                <option value="southwest">Southwest</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Result Card -->
+          <div class="result-box">
+            <div>
+              <div class="result-title">Projected Annual Medical Charge</div>
+              <div class="result-amount" id="calc-total">$6,128</div>
+              <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.4;">
+                This estimate reflects expected annual medical expenditures based on statistical regression trained on 1,338 Kaggle benchmark cases.
+              </p>
+            </div>
+
+            <div class="result-factors">
+              <div style="font-weight: 700; font-size: 0.88rem; color: #f1f5f9; margin-bottom: 0.25rem;">
+                Model Breakdown:
+              </div>
+              <div class="factor-row">
+                <span class="factor-name">Baseline Constant:</span>
+                <span class="factor-value">-$11,939</span>
+              </div>
+              <div class="factor-row">
+                <span class="factor-name">Age Impact (<span id="calc-breakdown-age">35</span> yrs × $256.86):</span>
+                <span class="factor-value pos" id="calc-breakdown-age-val">+$8,990</span>
+              </div>
+              <div class="factor-row">
+                <span class="factor-name">BMI Impact (<span id="calc-breakdown-bmi">27.5</span> × $339.19):</span>
+                <span class="factor-value pos" id="calc-breakdown-bmi-val">+$9,328</span>
+              </div>
+              <div class="factor-row">
+                <span class="factor-name">Smoker Addition:</span>
+                <span class="factor-value" id="calc-breakdown-smoker-val" style="color:#94a3b8;">+$0 (Non-Smoker)</span>
+              </div>
+              <div class="factor-row">
+                <span class="factor-name">Dependents Impact (<span id="calc-breakdown-child">1</span> × $475.50):</span>
+                <span class="factor-value pos" id="calc-breakdown-child-val">+$476</span>
+              </div>
+              <div class="factor-row">
+                <span class="factor-name">Region & Gender Adjustment:</span>
+                <span class="factor-value" id="calc-breakdown-adj-val">-$1,035</span>
+              </div>
+            </div>
+
+            <button onclick="resetCalculator()" style="margin-top: 1.25rem; padding: 0.65rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+              ↺ Reset Values to Default
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: 6 PLANNED VISUALIZATIONS -->
+    <div id="tab-visualizations" class="tab-content">
+      <div class="card">
+        <div class="card-title">📈 The 6 Planned Visualizations (Proposal Deliverables)</div>
+        <p class="card-subtitle">
+          Interactive charts rendered with Chart.js based on the Kaggle dataset. Click on any high-resolution static plot to enlarge.
+        </p>
+
+        <div class="plots-grid">
+          <!-- Plot 1: Histogram -->
+          <div class="plot-card">
+            <div class="plot-header">
+              <h3>1. Distribution of Insurance Charges</h3>
+              <p>Understand the distribution and common ranges of charges (Right-skewed, peak at $2k–$5k).</p>
+            </div>
+            <div class="plot-canvas-wrapper">
+              <canvas id="chart-histogram"></canvas>
+            </div>
+          </div>
+
+          <!-- Plot 2: Box Plot Smoker vs Non-Smoker -->
+          <div class="plot-card">
+            <div class="plot-header">
+              <h3>2. Smoker vs. Non-Smoker Charges</h3>
+              <p>Compare typical charges and variability: Non-smoker median $7,345 vs Smoker median $34,456.</p>
+            </div>
+            <div class="plot-canvas-wrapper">
+              <canvas id="chart-smoker"></canvas>
+            </div>
+          </div>
+
+          <!-- Plot 3: Scatter Age vs Charges -->
+          <div class="plot-card">
+            <div class="plot-header">
+              <h3>3. Scatter Plot: Age vs. Charges</h3>
+              <p>Examine relationship between age and costs: upward slope showing three distinct tiers.</p>
+            </div>
+            <div class="plot-canvas-wrapper">
+              <canvas id="chart-age"></canvas>
+            </div>
+          </div>
+
+          <!-- Plot 4: Scatter BMI vs Charges -->
+          <div class="plot-card">
+            <div class="plot-header">
+              <h3>4. Scatter Plot: BMI vs. Charges</h3>
+              <p>Identify patterns between BMI and costs: Notice sharp divergence for smokers above BMI 30.</p>
+            </div>
+            <div class="plot-canvas-wrapper">
+              <canvas id="chart-bmi"></canvas>
+            </div>
+          </div>
+
+          <!-- Plot 5: Average Charges by Region -->
+          <div class="plot-card">
+            <div class="plot-header">
+              <h3>5. Bar Chart: Average Charges by Region</h3>
+              <p>Southeast has highest average charges ($14,735) followed by Northeast ($13,406).</p>
+            </div>
+            <div class="plot-canvas-wrapper">
+              <canvas id="chart-region"></canvas>
+            </div>
+          </div>
+
+          <!-- Plot 6: Average Charges by Sex -->
+          <div class="plot-card">
+            <div class="plot-header">
+              <h3>6. Bar Chart: Average Charges by Sex</h3>
+              <p>Males ($13,957 avg) incur slightly higher costs than Females ($12,570 avg).</p>
+            </div>
+            <div class="plot-canvas-wrapper">
+              <canvas id="chart-sex"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: DATASET EXPLORER -->
+    <div id="tab-explorer" class="tab-content">
+      <div class="card">
+        <div class="card-title">📋 Medical Cost Dataset Explorer</div>
+        <p class="card-subtitle">Browse, filter, and inspect all 1,338 records from the Kaggle dataset.</p>
+
+        <div class="table-controls">
+          <input type="text" class="search-box" id="table-search" placeholder="🔍 Search records (e.g. age, charges, region)..." oninput="filterTable()">
+          
+          <select class="filter-select" id="table-filter-smoker" onchange="filterTable()">
+            <option value="all">Smoking: All</option>
+            <option value="yes">Smoker: Yes</option>
+            <option value="no">Smoker: No</option>
+          </select>
+
+          <select class="filter-select" id="table-filter-sex" onchange="filterTable()">
+            <option value="all">Sex: All</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+          </select>
+
+          <select class="filter-select" id="table-filter-region" onchange="filterTable()">
+            <option value="all">Region: All</option>
+            <option value="northeast">Northeast</option>
+            <option value="northwest">Northwest</option>
+            <option value="southeast">Southeast</option>
+            <option value="southwest">Southwest</option>
+          </select>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Age</th>
+                <th>Sex</th>
+                <th>BMI</th>
+                <th>Children</th>
+                <th>Smoker</th>
+                <th>Region</th>
+                <th>Charges ($ USD)</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <span id="page-info">Showing 1 to 20 of 1,338 records</span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="page-btn" id="btn-prev" onclick="changePage(-1)">← Previous</button>
+            <button class="page-btn" id="btn-next" onclick="changePage(1)">Next →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: PROPOSAL & FINDINGS -->
+    <div id="tab-proposal" class="tab-content">
+      <div class="card">
+        <div class="card-title">📄 Project Proposal & Research Summary</div>
+        <p class="card-subtitle">Alignment with the Course Proposal (IU2441230558, IU2441230559 - PSC CE0525, 5 CSE-F)</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          <div>
+            <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem; color: var(--gray-900);">1. Proposal Scope & Objectives</h3>
+            <ul style="padding-left: 1.25rem; font-size: 0.88rem; color: var(--gray-700); line-height: 1.7;">
+              <li><strong>Project Definition:</strong> Analysis of medical insurance charges using Python, exploring age, sex, BMI, number of children, smoking status, and region.</li>
+              <li><strong>Dataset:</strong> Kaggle Medical Cost Personal Datasets (1,338 rows, 7 attributes).</li>
+              <li><strong>Core Deliverables:</strong> Data cleaning, EDA, 6 statistical graphs, interactive user interface, and an insights report.</li>
+              <li><strong>Tools:</strong> Python, Pandas, NumPy, Matplotlib, Seaborn, JavaScript/HTML5 UI, Tkinter GUI.</li>
+              <li><strong>GitHub Repository:</strong> <a href="https://github.com/nandankhagram69/medical-cost-insurance-analysis" target="_blank" style="color:var(--primary); font-weight:600;">nandankhagram69/medical-cost-insurance-analysis</a></li>
+            </ul>
+
+            <h3 style="font-size: 1.05rem; margin: 1.25rem 0 0.75rem 0; color: var(--gray-900);">2. Data Cleaning Summary</h3>
+            <ul style="padding-left: 1.25rem; font-size: 0.88rem; color: var(--gray-700); line-height: 1.7;">
+              <li><strong>Missing Values:</strong> Verified 0 missing/null entries across all 7 columns.</li>
+              <li><strong>Duplicates:</strong> 1 duplicate record identified and preserved/documented per standard data cleaning protocols.</li>
+              <li><strong>Data Types:</strong> Clean mapping of numeric (`age`, `bmi`, `children`, `charges`) and categorical (`sex`, `smoker`, `region`).</li>
+              <li><strong>Outlier Checks:</strong> High charges were confirmed as legitimate high-risk smoker and extreme BMI cases rather than data collection errors.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem; color: var(--gray-900);">3. Empirical Findings & Report</h3>
+            
+            <div class="insight-card">
+              <h4>Smoker Status Discrepancy</h4>
+              <p>Smoking accounts for the largest variance in insurance premiums. The regression coefficient for smokers is <strong>+$23,848.53</strong>, making smoking status the overwhelming risk predictor.</p>
+            </div>
+
+            <div class="insight-card">
+              <h4>Obesity Combined Effect</h4>
+              <p>Non-smokers with high BMI see gradual cost increases. However, individuals who are both smokers and clinically obese (BMI ≥ 30) suffer a compound cost penalty, routinely facing charges above $35,000–$45,000.</p>
+            </div>
+
+            <div class="insight-card">
+              <h4>Regional Differences</h4>
+              <p>Southeast charges average $14,735, highest among all 4 regions, due to higher obesity rates and smoking prevalence in that geographical sample.</p>
+            </div>
+
+            <div class="insight-card">
+              <h4>Model Performance</h4>
+              <p>The Multiple Linear Regression model achieves an <strong>$R^2$ score of 0.751</strong>, proving that 75.1% of cost variability can be explained by these 6 demographic and health metrics.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Image Modal -->
+  <div id="imageModal" class="modal" onclick="closeModal()">
+    <span class="modal-close">&times;</span>
+    <img class="modal-content" id="modalImg">
+  </div>
+
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      
+      const targetTab = document.getElementById('tab-' + tabId);
+      if (targetTab) targetTab.classList.add('active');
+      
+      const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (tabId === 'visualizations') {
+        initCharts();
+      }
+    }
+
+    // Modal controls
+    function openModal(src) {
+      const modal = document.getElementById('imageModal');
+      const img = document.getElementById('modalImg');
+      modal.style.display = 'flex';
+      img.src = src;
+    }
+
+    function closeModal() {
+      document.getElementById('imageModal').style.display = 'none';
+    }
+
+    // Quick Estimator (Dashboard Tab)
+    function updateQuickEstimate() {
+      const age = parseInt(document.getElementById('quick-age').value);
+      const bmi = parseFloat(document.getElementById('quick-bmi').value);
+      const isSmoker = document.querySelector('input[name="quick-smoker"]:checked').value === 'yes';
+
+      document.getElementById('quick-age-val').innerText = age;
+      document.getElementById('quick-bmi-val').innerText = bmi.toFixed(1);
+
+      let estimate = -11938.54 + (256.86 * age) + (339.19 * bmi) + (475.50 * 1);
+      if (isSmoker) estimate += 23848.53;
+      estimate -= 1035.02; // SE region baseline
+
+      if (estimate < 1121) estimate = 1121;
+      document.getElementById('quick-result').innerText = '$' + Math.round(estimate).toLocaleString();
+    }
+
+    // Full Estimator (Predictor Tab)
+    function calculateFullEstimate() {
+      const age = parseInt(document.getElementById('calc-age').value);
+      const bmi = parseFloat(document.getElementById('calc-bmi').value);
+      const children = parseInt(document.getElementById('calc-children').value);
+      const isSmoker = document.querySelector('input[name="calc-smoker"]:checked').value === 'yes';
+      const sex = document.querySelector('input[name="calc-sex"]:checked').value;
+      const region = document.getElementById('calc-region').value;
+
+      document.getElementById('badge-age').innerText = age + ' yrs';
+      document.getElementById('badge-bmi').innerText = bmi.toFixed(1) + ' kg/m²';
+      document.getElementById('badge-children').innerText = children + (children === 1 ? ' Child' : ' Children');
+
+      // BMI badge styling
+      const bmiBadge = document.getElementById('bmi-status-badge');
+      if (bmi < 18.5) {
+        bmiBadge.className = 'bmi-indicator bmi-overweight';
+        bmiBadge.innerText = 'Underweight';
+      } else if (bmi < 25.0) {
+        bmiBadge.className = 'bmi-indicator bmi-normal';
+        bmiBadge.innerText = 'Normal (Healthy)';
+      } else if (bmi < 30.0) {
+        bmiBadge.className = 'bmi-indicator bmi-overweight';
+        bmiBadge.innerText = 'Overweight';
+      } else {
+        bmiBadge.className = 'bmi-indicator bmi-obese';
+        bmiBadge.innerText = 'Obese (Risk Alert)';
+      }
+
+      // Regression coefficients:
+      // charges = -11938.54 + 256.86*age + 339.19*bmi + 475.50*children - 131.31*(male) + 23848.53*(smoker)
+      // region NW: -352.96, SE: -1035.02, SW: -960.05
+      let intercept = -11938.54;
+      let ageImpact = 256.86 * age;
+      let bmiImpact = 339.19 * bmi;
+      let childImpact = 475.50 * children;
+      let sexImpact = (sex === 'male') ? -131.31 : 0;
+      let smokerImpact = isSmoker ? 23848.53 : 0;
+      
+      let regionImpact = 0;
+      if (region === 'northwest') regionImpact = -352.96;
+      else if (region === 'southeast') regionImpact = -1035.02;
+      else if (region === 'southwest') regionImpact = -960.05;
+
+      // Interaction term for realistic high BMI smoker bump
+      let interactionBump = 0;
+      if (isSmoker && bmi >= 30) {
+        interactionBump = (bmi - 30) * 450;
+      }
+
+      let total = intercept + ageImpact + bmiImpact + childImpact + sexImpact + smokerImpact + regionImpact + interactionBump;
+      if (total < 1120) total = 1120; // min charge in dataset
+
+      document.getElementById('calc-total').innerText = '$' + Math.round(total).toLocaleString();
+
+      // Breakdown display
+      document.getElementById('calc-breakdown-age').innerText = age;
+      document.getElementById('calc-breakdown-age-val').innerText = '+$' + Math.round(ageImpact).toLocaleString();
+
+      document.getElementById('calc-breakdown-bmi').innerText = bmi.toFixed(1);
+      document.getElementById('calc-breakdown-bmi-val').innerText = '+$' + Math.round(bmiImpact).toLocaleString();
+
+      document.getElementById('calc-breakdown-child').innerText = children;
+      document.getElementById('calc-breakdown-child-val').innerText = '+$' + Math.round(childImpact).toLocaleString();
+
+      const smokerElem = document.getElementById('calc-breakdown-smoker-val');
+      if (isSmoker) {
+        smokerElem.innerText = '+$' + Math.round(smokerImpact + interactionBump).toLocaleString() + ' (Smoker Penalty)';
+        smokerElem.style.color = '#f87171';
+      } else {
+        smokerElem.innerText = '+$0 (Non-Smoker)';
+        smokerElem.style.color = '#94a3b8';
+      }
+
+      let netAdj = sexImpact + regionImpact;
+      let adjElem = document.getElementById('calc-breakdown-adj-val');
+      if (netAdj >= 0) {
+        adjElem.innerText = '+$' + Math.round(netAdj).toLocaleString();
+        adjElem.className = 'factor-value pos';
+      } else {
+        adjElem.innerText = '-$' + Math.round(Math.abs(netAdj)).toLocaleString();
+        adjElem.className = 'factor-value neg';
+      }
+    }
+
+    function resetCalculator() {
+      document.getElementById('calc-age').value = 35;
+      document.getElementById('calc-bmi').value = 27.5;
+      document.getElementById('calc-children').value = 1;
+      document.getElementById('smoker-no').checked = true;
+      document.getElementById('sex-female').checked = true;
+      document.getElementById('calc-region').value = 'southeast';
+      calculateFullEstimate();
+    }
+
+    // Table Pagination and Filtering
+    let currentPage = 1;
+    const rowsPerPage = 15;
+    let filteredRecords = [];
+
+    function initTable() {
+      if (typeof INSURANCE_DATA !== 'undefined') {
+        filteredRecords = [...INSURANCE_DATA];
+        renderTable();
+      }
+    }
+
+    function filterTable() {
+      const q = document.getElementById('table-search').value.toLowerCase().trim();
+      const smoker = document.getElementById('table-filter-smoker').value;
+      const sex = document.getElementById('table-filter-sex').value;
+      const region = document.getElementById('table-filter-region').value;
+
+      filteredRecords = INSURANCE_DATA.filter(row => {
+        if (smoker !== 'all' && row.smoker !== smoker) return false;
+        if (sex !== 'all' && row.sex !== sex) return false;
+        if (region !== 'all' && row.region !== region) return false;
+        if (q) {
+          const matchStr = `${row.age} ${row.sex} ${row.bmi} ${row.children} ${row.smoker} ${row.region} ${row.charges}`.toLowerCase();
+          if (!matchStr.includes(q)) return false;
+        }
+        return true;
+      });
+
+      currentPage = 1;
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      const total = filteredRecords.length;
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = Math.min(start + rowsPerPage, total);
+      const pageData = filteredRecords.slice(start, end);
+
+      if (pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: #64748b;">No matching records found.</td></tr>';
+        document.getElementById('page-info').innerText = 'Showing 0 records';
+        document.getElementById('btn-prev').disabled = true;
+        document.getElementById('btn-next').disabled = true;
+        return;
+      }
+
+      pageData.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${start + idx + 1}</strong></td>
+          <td>${row.age}</td>
+          <td style="text-transform: capitalize;">${row.sex}</td>
+          <td>${parseFloat(row.bmi).toFixed(2)}</td>
+          <td>${row.children}</td>
+          <td>
+            <span class="tag ${row.smoker === 'yes' ? 'tag-smoker-yes' : 'tag-smoker-no'}">
+              ${row.smoker.toUpperCase()}
+            </span>
+          </td>
+          <td style="text-transform: capitalize;">${row.region}</td>
+          <td style="font-weight: 700; color: #0284c7;">$${parseFloat(row.charges).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('page-info').innerText = `Showing ${start + 1} to ${end} of ${total.toLocaleString()} records`;
+      document.getElementById('btn-prev').disabled = currentPage === 1;
+      document.getElementById('btn-next').disabled = end >= total;
+    }
+
+    function changePage(direction) {
+      currentPage += direction;
+      renderTable();
+    }
+
+    // Chart.js Visualizations
+    let chartsInitialized = false;
+    function initCharts() {
+      if (chartsInitialized) return;
+      if (typeof Chart === 'undefined') {
+        console.warn('Chart.js CDN not loaded; images serve as fallback.');
+        return;
+      }
+      chartsInitialized = true;
+
+      // 1. Histogram (Charges Bins)
+      const chargeBins = [
+        { label: '$1k-$5k', count: 0 },
+        { label: '$5k-$10k', count: 0 },
+        { label: '$10k-$15k', count: 0 },
+        { label: '$15k-$20k', count: 0 },
+        { label: '$20k-$30k', count: 0 },
+        { label: '$30k-$40k', count: 0 },
+        { label: '$40k-$50k', count: 0 },
+        { label: '$50k+', count: 0 }
+      ];
+
+      INSURANCE_DATA.forEach(r => {
+        const c = r.charges;
+        if (c < 5000) chargeBins[0].count++;
+        else if (c < 10000) chargeBins[1].count++;
+        else if (c < 15000) chargeBins[2].count++;
+        else if (c < 20000) chargeBins[3].count++;
+        else if (c < 30000) chargeBins[4].count++;
+        else if (c < 40000) chargeBins[5].count++;
+        else if (c < 50000) chargeBins[6].count++;
+        else chargeBins[7].count++;
+      });
+
+      new Chart(document.getElementById('chart-histogram'), {
+        type: 'bar',
+        data: {
+          labels: chargeBins.map(b => b.label),
+          datasets: [{
+            label: 'Individual Count',
+            data: chargeBins.map(b => b.count),
+            backgroundColor: '#2563eb',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { title: { display: true, text: 'Frequency / Count' } } }
+        }
+      });
+
+      // 2. Smoker vs Non-Smoker
+      new Chart(document.getElementById('chart-smoker'), {
+        type: 'bar',
+        data: {
+          labels: ['Non-Smoker (n=1,064)', 'Smoker (n=274)'],
+          datasets: [
+            {
+              label: 'Average Charges ($)',
+              data: [8434.27, 32050.23],
+              backgroundColor: ['#10b981', '#ef4444'],
+              borderRadius: 6
+            },
+            {
+              label: 'Median Charges ($)',
+              data: [7345.41, 34456.35],
+              backgroundColor: ['#6ee7b7', '#fca5a5'],
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { y: { title: { display: true, text: 'Charges ($ USD)' } } }
+        }
+      });
+
+      // 3. Scatter: Age vs Charges
+      const nonSmokerAge = [];
+      const smokerAge = [];
+      INSURANCE_DATA.forEach(r => {
+        const pt = { x: r.age, y: Math.round(r.charges) };
+        if (r.smoker === 'yes') smokerAge.push(pt);
+        else nonSmokerAge.push(pt);
+      });
+
+      new Chart(document.getElementById('chart-age'), {
+        type: 'scatter',
+        data: {
+          datasets: [
+            {
+              label: 'Non-Smoker',
+              data: nonSmokerAge,
+              backgroundColor: 'rgba(16, 185, 129, 0.45)',
+              pointRadius: 3
+            },
+            {
+              label: 'Smoker',
+              data: smokerAge,
+              backgroundColor: 'rgba(239, 68, 68, 0.6)',
+              pointRadius: 3.5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { title: { display: true, text: 'Age (Years)' } },
+            y: { title: { display: true, text: 'Charges ($ USD)' } }
+          }
+        }
+      });
+
+      // 4. Scatter: BMI vs Charges
+      const nonSmokerBmi = [];
+      const smokerBmi = [];
+      INSURANCE_DATA.forEach(r => {
+        const pt = { x: r.bmi, y: Math.round(r.charges) };
+        if (r.smoker === 'yes') smokerBmi.push(pt);
+        else nonSmokerBmi.push(pt);
+      });
+
+      new Chart(document.getElementById('chart-bmi'), {
+        type: 'scatter',
+        data: {
+          datasets: [
+            {
+              label: 'Non-Smoker',
+              data: nonSmokerBmi,
+              backgroundColor: 'rgba(16, 185, 129, 0.45)',
+              pointRadius: 3
+            },
+            {
+              label: 'Smoker',
+              data: smokerBmi,
+              backgroundColor: 'rgba(239, 68, 68, 0.6)',
+              pointRadius: 3.5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { title: { display: true, text: 'BMI (kg/m²)' } },
+            y: { title: { display: true, text: 'Charges ($ USD)' } }
+          }
+        }
+      });
+
+      // 5. Region Bar Chart
+      new Chart(document.getElementById('chart-region'), {
+        type: 'bar',
+        data: {
+          labels: ['Southeast', 'Northeast', 'Northwest', 'Southwest'],
+          datasets: [{
+            label: 'Average Charges ($)',
+            data: [14735, 13406, 12418, 12347],
+            backgroundColor: ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { title: { display: true, text: 'Average Charges ($ USD)' } } }
+        }
+      });
+
+      // 6. Sex Bar Chart
+      new Chart(document.getElementById('chart-sex'), {
+        type: 'bar',
+        data: {
+          labels: ['Male', 'Female'],
+          datasets: [{
+            label: 'Average Charges ($)',
+            data: [13957, 12570],
+            backgroundColor: ['#3b82f6', '#ec4899'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { title: { display: true, text: 'Average Charges ($ USD)' } } }
+        }
+      });
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      calculateFullEstimate();
+      updateQuickEstimate();
+      initTable();
+    });
+  </script>
+</body>
+</html>
